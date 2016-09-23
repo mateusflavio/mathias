@@ -7,8 +7,9 @@ from rest_framework.views import APIView
 
 from mathias.logs.manager import LogManager
 from mathias.utils.metadata import Meta, MetaError
+from mathias.valeu.core.adapter_valeu import AdapterValeu
 from mathias.valeu.models import Valeu
-from mathias.valeu.serializers import ValeuSerializer
+from mathias.valeu.serializers import ValeuSerializer, ValeuSaveSerializer
 
 
 class ValeuList(APIView):
@@ -38,23 +39,29 @@ class ValeuList(APIView):
         data = meta.determine_metadata(request, self, Meta(), serializer.data)
         return Response(data)
 
-
     def post(self, request, format=None):
         """
-        Create a new message
+        Save valeu
         ---
-        response_serializer: ValeuSerializer
+        response_serializer: ValeuSaveSerializer
         parameters:
             - name: body
-              pytype: ValeuSerializer
+              pytype: ValeuSaveSerializer
               paramType: body
         """
         meta = self.metadata_class()
 
-        serializer = ValeuSerializer(data=request.data, many=True)
-        if serializer.is_valid():
+        serializer_request = ValeuSaveSerializer(data=request.data)
+
+        if serializer_request.is_valid():
+
+            calculate = serializer_request.save()
+
             try:
-                serializer.save()
+                valeu = AdapterValeu(calculate).adapter()
+
+                for v in valeu:
+                    v.save()
             except Exception as e:
                 LogManager.log(self, logging.ERROR, str(e))
                 meta_error = MetaError('Internal Server Error - ' + str(e),
@@ -68,19 +75,63 @@ class ValeuList(APIView):
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             data = meta.determine_metadata(request, self, Meta(),
-                                           serializer.data)
+                                           None)
             return Response(data, status=status.HTTP_201_CREATED)
+
+
         else:
             meta_error = MetaError(
-                'Bad Request - Body invalid for OrganizationSerializer ' +
-                str(serializer.errors),
+                'Bad Request - Body invalid for ValeuSaveSerializer ' +
+                str(serializer_request.errors),
                 'Your request is invalid for a new application',
                 status.HTTP_400_BAD_REQUEST)
             data = meta.determine_metadata_error(request, self,
                                                  [meta_error])
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def post(self, request, format=None):
+    #     """
+    #     Create a new message
+    #     ---
+    #     response_serializer: ValeuSerializer
+    #     parameters:
+    #         - name: body
+    #           pytype: ValeuSerializer
+    #           paramType: body
+    #     """
+    #     meta = self.metadata_class()
+    #
+    #     serializer = ValeuSerializer(data=request.data, many=True)
+    #     if serializer.is_valid():
+    #         try:
+    #             serializer.save()
+    #         except Exception as e:
+    #             LogManager.log(self, logging.ERROR, str(e))
+    #             meta_error = MetaError('Internal Server Error - ' + str(e),
+    #                                    'Was encountered an error when'
+    #                                    ' processing your request. We '
+    #                                    'apologize for the inconvenience',
+    #                                    status.HTTP_500_INTERNAL_SERVER_ERROR)
+    #             data = meta.determine_metadata_error(request, self,
+    #                                                  [meta_error])
+    #             return Response(data,
+    #                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    #
+    #         data = meta.determine_metadata(request, self, Meta(),
+    #                                        serializer.data)
+    #         return Response(data, status=status.HTTP_201_CREATED)
+    #     else:
+    #         meta_error = MetaError(
+    #             'Bad Request - Body invalid for OrganizationSerializer ' +
+    #             str(serializer.errors),
+    #             'Your request is invalid for a new application',
+    #             status.HTTP_400_BAD_REQUEST)
+    #         data = meta.determine_metadata_error(request, self,
+    #                                              [meta_error])
+    #         return Response(data, status=status.HTTP_400_BAD_REQUEST)
+    #
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ValeuDetail(APIView):
     def get_object(self, pk):
