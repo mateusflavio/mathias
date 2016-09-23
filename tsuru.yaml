@@ -1,0 +1,4 @@
+hooks:
+  build:
+    - python /home/application/current/django/manage.py migrate
+    - python /home/application/current/django/manage.py collectstatic --no-input
