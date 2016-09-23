@@ -1,2 +1,2 @@
 -r base.txt
-gunicorn==19.4.1
+gunicorn==19.6.0
