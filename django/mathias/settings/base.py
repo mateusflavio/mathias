@@ -1,6 +1,6 @@
 import os
 
-DEBUG = False
+DEBUG = True
 
 VERSION = '1.0.0'
 
