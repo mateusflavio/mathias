@@ -1,16 +1,13 @@
-# witwicky-api
+# mathias
 --
-![witwicky](https://dreager1.files.wordpress.com/2014/09/924873-transformers_rotf15.jpg)
+![mathias](http://gcn.net.br/dir-arquivo-imagem/2015/08/20150818225832_4043748.jpg)
 
-
-## Documentation
-[Link](http://docs.luizalabs.com/transformers/witwicky)
 
 ## Installation
 
 Create a virtualenv (use `virtualenvwrapper`):  
 ```bash
-$ mkvirtualenv witwicky-api -p python3
+$ mkvirtualenv mathias -p python3
 ```
 
 Install development requirements:  
@@ -44,3 +41,4 @@ To show coverage details (in HTML), use:
 ```bash
     make test html
 ```
+
