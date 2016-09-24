@@ -1,2 +1,2 @@
-web: gunicorn mathias.wsgi --log-file -
+web: gunicorn --pythonpath django mathias.wsgi --log-file -
 
