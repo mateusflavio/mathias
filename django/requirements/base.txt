@@ -13,3 +13,4 @@ six==1.10.0
 python-logstash==0.4.6
 dj-static==0.0.6
 gevent==1.1.2
+python-decouple==3.0
