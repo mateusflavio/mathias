@@ -3,7 +3,7 @@ from django.utils import timezone
 
 class Valeu(models.Model):
     id = models.AutoField(primary_key=True)
-    team_id = models.IntegerField()
+    team_id = models.CharField(max_length=50)
     team_domain = models.CharField(max_length=500)
     channel_id = models.CharField(max_length=50)
     channel_name = models.CharField(max_length=500)
