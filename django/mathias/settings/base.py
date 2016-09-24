@@ -1,7 +1,7 @@
 import os
+from decouple import config
 
-DEBUG = True
-
+DEBUG = config('DEBUG', default=False, cast=bool)
 VERSION = '1.0.0'
 
 ADMINS = (
@@ -9,11 +9,9 @@ ADMINS = (
 )
 
 BASE_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
+SECRET_KEY = config('SECRET_KEY')
 
 MANAGERS = ADMINS
-
-SECRET_KEY='j0j33p)77@%y1n5fo1v)%)jg%#!+c($-4m(ai&&ap&n8%81a%_'
-
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
