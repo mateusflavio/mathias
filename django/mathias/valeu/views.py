@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
+from django.db import connection
+
 from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
@@ -8,6 +10,7 @@ from rest_framework.views import APIView
 from mathias.logs.manager import LogManager
 from mathias.utils.metadata import Meta, MetaError
 from mathias.valeu.core.adapter_valeu import AdapterValeu
+from mathias.valeu.core import mysql_count_valeu
 from mathias.valeu.models import Valeu
 from mathias.valeu.serializers import ValeuSerializer, ValeuSaveSerializer
 
@@ -43,7 +46,7 @@ class ValeuList(APIView):
         """
         Save valeu
         ---
-        response_serializer: ValeuSaveSerializer
+        response_serializer: String
         parameters:
             - name: body
               pytype: ValeuSaveSerializer
@@ -52,6 +55,7 @@ class ValeuList(APIView):
         meta = self.metadata_class()
 
         serializer_request = ValeuSaveSerializer(data=request.data)
+        mensagem_return = ''
 
         if serializer_request.is_valid():
 
@@ -61,7 +65,32 @@ class ValeuList(APIView):
                 valeu = AdapterValeu(calculate).adapter()
 
                 for v in valeu:
-                    v.save()
+                    # v.save()
+                    query = mysql_count_valeu.query(
+                        user_name_from=v.user_name_to)
+
+                    print(query)
+                    raw_list = []
+                    with connection.cursor() as c:
+                        c.execute(query)
+
+                        print(query)
+
+                        columns = c.description
+
+                        results = c.fetchall()
+
+                        for value in results:
+                            tmp = {}
+                            for (index, column) in enumerate(value):
+                                tmp[columns[index][0]] = column
+                            raw_list.append(tmp)
+
+                    mensagem_return += raw_list[0]['user_name_to'] + ' have ' + str(
+                        raw_list[0]['points']) + ' points\n'
+
+                    print(raw_list[0]['user_name_to'] + ' have ' + str(raw_list[0]['points']) + ' points')
+
             except Exception as e:
                 LogManager.log(self, logging.ERROR, str(e))
                 meta_error = MetaError('Internal Server Error - ' + str(e),
@@ -74,9 +103,8 @@ class ValeuList(APIView):
                 return Response(data,
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            data = meta.determine_metadata(request, self, Meta(),
-                                           None)
-            return Response(data, status=status.HTTP_201_CREATED)
+
+            return Response(mensagem_return, status=status.HTTP_200_OK)
 
 
         else:
