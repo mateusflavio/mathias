@@ -65,7 +65,7 @@ class ValeuList(APIView):
                 valeu = AdapterValeu(calculate).adapter()
 
                 for v in valeu:
-                    # v.save()
+                    v.save()
                     query = mysql_count_valeu.query(
                         user_name_from=v.user_name_to)
 
