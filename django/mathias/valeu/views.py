@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from mathias.api.slack import SlackApi
 from mathias.logs.manager import LogManager
 from mathias.utils.metadata import Meta, MetaError
 from mathias.valeu.core.adapter_valeu import AdapterValeu
@@ -16,6 +17,39 @@ from mathias.valeu.serializers import ValeuSerializer, ValeuSaveSerializer
 
 
 class ValeuList(APIView):
+
+    def search_points_user(self, user_name_to):
+
+        query = mysql_count_valeu.query(
+            user_name_from=user_name_to)
+        raw_list = []
+        with connection.cursor() as c:
+            c.execute(query)
+            columns = c.description
+            results = c.fetchall()
+
+            for value in results:
+                tmp = {}
+                for (index, column) in enumerate(value):
+                    tmp[columns[index][0]] = column
+                raw_list.append(tmp)
+
+        return raw_list
+
+    def send_message(self, valeu):
+
+        raw_list = self.search_points_user(valeu.user_name_to)
+
+        pretext = raw_list[0]['user_name_to'] + ' now has ' + str(raw_list[0]['points'])+' points!'
+
+        message = 'from '+'<@'+str(valeu.user_id_from) + '>:\n' + valeu.text
+
+        attachments = '[{ "color": "good", "pretext":"'+pretext+'", '+'"text":"'+message+'"}]'
+
+        icon_url = 'http://gcn.net.br/dir-arquivo-imagem/2015/08/20150818225832_4043748.jpg'
+
+        return SlackApi.send_message(self, valeu.channel_id, 'mathias', icon_url, attachments);
+
 
     def get(self, request, format=None):
         """
@@ -46,7 +80,6 @@ class ValeuList(APIView):
         """
         Save valeu
         ---
-        response_serializer: String
         parameters:
             - name: body
               pytype: ValeuSaveSerializer
@@ -65,31 +98,8 @@ class ValeuList(APIView):
                 valeu = AdapterValeu(calculate).adapter()
 
                 for v in valeu:
-                    v.save()
-                    query = mysql_count_valeu.query(
-                        user_name_from=v.user_name_to)
-
-                    print(query)
-                    raw_list = []
-                    with connection.cursor() as c:
-                        c.execute(query)
-
-                        print(query)
-
-                        columns = c.description
-
-                        results = c.fetchall()
-
-                        for value in results:
-                            tmp = {}
-                            for (index, column) in enumerate(value):
-                                tmp[columns[index][0]] = column
-                            raw_list.append(tmp)
-
-                    mensagem_return += raw_list[0]['user_name_to'] + ' have ' + str(
-                        raw_list[0]['points']) + ' points\n'
-
-                    print(raw_list[0]['user_name_to'] + ' have ' + str(raw_list[0]['points']) + ' points')
+                    #v.save()
+                    self.send_message(v)
 
             except Exception as e:
                 LogManager.log(self, logging.ERROR, str(e))
@@ -102,7 +112,6 @@ class ValeuList(APIView):
                                                      [meta_error])
                 return Response(data,
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
             return Response(mensagem_return, status=status.HTTP_200_OK)
 

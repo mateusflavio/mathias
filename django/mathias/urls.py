@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^', include('rest_framework_swagger.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^valeu/', include('mathias.valeu.urls')),
+    url(r'^user/', include('mathias.user.urls')),
     url(r'^healthcheck/', include('mathias.healthcheck.urls')),
 ]
 
