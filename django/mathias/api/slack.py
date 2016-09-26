@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import http.client
-from .base import *
 
 import requests
 from django.utils.six import BytesIO
