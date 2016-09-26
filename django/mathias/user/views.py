@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mathias.api.slack import SlackApi
-from mathias.logs.manager import LogManager
 from mathias.user.core.adapter_user import AdapterUser
 from mathias.utils.metadata import MetaError
 
@@ -25,9 +24,13 @@ class UserList(APIView):
             list_users = AdapterUser(users).adapter()
 
             for u in list_users:
+                # if u.id == 'U22C623DL':
+                #     teste = u.title
+                #
+                #     u.title = teste[0:-1]
+
                 u.save()
         except Exception as e:
-            LogManager.log(self, logging.ERROR, str(e))
             meta_error = MetaError('Internal Server Error - ' + str(e),
                                    'Was encountered an error when'
                                    ' processing your request. We '

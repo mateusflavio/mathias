@@ -212,5 +212,3 @@ LOGGING = {
         }
     }
 }
-
-BZTOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHAiOiJ0cmFuc2Zvcm1lcnMtd2l0d2lja3kiLCJ0ZWFtIjoiZnVsZmlsbG1lbnQifQ.So7woHWjxoGUAXSzlleajjmLTpUZnMOaVRTIfrbaoRQ'

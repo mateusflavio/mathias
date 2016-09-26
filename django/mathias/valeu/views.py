@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mathias.api.slack import SlackApi
-from mathias.logs.manager import LogManager
 from mathias.utils.metadata import Meta, MetaError
 from mathias.valeu.core.adapter_valeu import AdapterValeu
 from mathias.valeu.core import mysql_count_valeu
@@ -17,7 +16,6 @@ from mathias.valeu.serializers import ValeuSerializer, ValeuSaveSerializer
 
 
 class ValeuList(APIView):
-
     def search_points_user(self, user_name_to):
 
         query = mysql_count_valeu.query(
@@ -40,16 +38,15 @@ class ValeuList(APIView):
 
         raw_list = self.search_points_user(valeu.user_name_to)
 
-        pretext = raw_list[0]['user_name_to'] + ' now has ' + str(raw_list[0]['points'])+' points!'
+        pretext = '<@' + str(valeu.user_id_to) + '>' + ' now has ' + str(raw_list[0]['points']) + ' points!'
 
-        message = 'from '+'<@'+str(valeu.user_id_from) + '>:\n' + valeu.text
+        message = 'from ' + '<@' + str(valeu.user_id_from) + '>:\n' + valeu.text
 
-        attachments = '[{ "color": "good", "pretext":"'+pretext+'", '+'"text":"'+message+'"}]'
+        attachments = '[{ "color": "good", "pretext":"' + pretext + '", ' + '"text":"' + message + '"}]'
 
-        icon_url = 'http://gcn.net.br/dir-arquivo-imagem/2015/08/20150818225832_4043748.jpg'
+        icon_url = 'http://luizalabs.com/static/img/ll.png'
 
-        return SlackApi.send_message(self, valeu.channel_id, 'mathias', icon_url, attachments);
-
+        return SlackApi.send_message(self, valeu.channel_id, 'destaque', icon_url, attachments);
 
     def get(self, request, format=None):
         """
@@ -62,14 +59,13 @@ class ValeuList(APIView):
         try:
             valeu = Valeu.objects.all()
         except Exception as e:
-            LogManager.log(self, logging.ERROR, str(e))
             meta_error = MetaError('Internal Server Error - ' + str(e),
                                    'Was encountered an error when'
                                    ' processing your request. We '
                                    'apologize for the inconvenience',
                                    status.HTTP_500_INTERNAL_SERVER_ERROR)
             data = meta.determine_metadata_error(
-            request, self, [meta_error])
+                request, self, [meta_error])
             return Response(data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         serializer = ValeuSerializer(valeu, many=True)
@@ -88,7 +84,6 @@ class ValeuList(APIView):
         meta = self.metadata_class()
 
         serializer_request = ValeuSaveSerializer(data=request.data)
-        mensagem_return = ''
 
         if serializer_request.is_valid():
 
@@ -97,12 +92,19 @@ class ValeuList(APIView):
             try:
                 valeu = AdapterValeu(calculate).adapter()
 
+                if '@' in valeu:
+                    meta_error = MetaError('User(s) '+ valeu +' in /valeu not found',
+                                           'User(s) '+ valeu +' in /valeu not found',
+                                           status.HTTP_404_NOT_FOUND)
+                    data = meta.determine_metadata_error(request, self,
+                                                         [meta_error])
+                    return Response(data,
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 for v in valeu:
-                    #v.save()
+                    v.save()
                     self.send_message(v)
 
             except Exception as e:
-                LogManager.log(self, logging.ERROR, str(e))
                 meta_error = MetaError('Internal Server Error - ' + str(e),
                                        'Was encountered an error when'
                                        ' processing your request. We '
@@ -113,62 +115,19 @@ class ValeuList(APIView):
                 return Response(data,
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            return Response(mensagem_return, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
 
 
         else:
             meta_error = MetaError(
                 'Bad Request - Body invalid for ValeuSaveSerializer ' +
                 str(serializer_request.errors),
-                'Your request is invalid for a new application',
+                'Your request is invalid for a new /valeu',
                 status.HTTP_400_BAD_REQUEST)
             data = meta.determine_metadata_error(request, self,
                                                  [meta_error])
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-
-    # def post(self, request, format=None):
-    #     """
-    #     Create a new message
-    #     ---
-    #     response_serializer: ValeuSerializer
-    #     parameters:
-    #         - name: body
-    #           pytype: ValeuSerializer
-    #           paramType: body
-    #     """
-    #     meta = self.metadata_class()
-    #
-    #     serializer = ValeuSerializer(data=request.data, many=True)
-    #     if serializer.is_valid():
-    #         try:
-    #             serializer.save()
-    #         except Exception as e:
-    #             LogManager.log(self, logging.ERROR, str(e))
-    #             meta_error = MetaError('Internal Server Error - ' + str(e),
-    #                                    'Was encountered an error when'
-    #                                    ' processing your request. We '
-    #                                    'apologize for the inconvenience',
-    #                                    status.HTTP_500_INTERNAL_SERVER_ERROR)
-    #             data = meta.determine_metadata_error(request, self,
-    #                                                  [meta_error])
-    #             return Response(data,
-    #                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    #
-    #         data = meta.determine_metadata(request, self, Meta(),
-    #                                        serializer.data)
-    #         return Response(data, status=status.HTTP_201_CREATED)
-    #     else:
-    #         meta_error = MetaError(
-    #             'Bad Request - Body invalid for OrganizationSerializer ' +
-    #             str(serializer.errors),
-    #             'Your request is invalid for a new application',
-    #             status.HTTP_400_BAD_REQUEST)
-    #         data = meta.determine_metadata_error(request, self,
-    #                                              [meta_error])
-    #         return Response(data, status=status.HTTP_400_BAD_REQUEST)
-    #
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ValeuDetail(APIView):
     def get_object(self, pk):
@@ -229,7 +188,6 @@ class ValeuDetail(APIView):
             try:
                 serializer.save()
             except Exception as e:
-                LogManager.log(self, logging.ERROR, str(e));
                 meta_error = MetaError('Internal Server Error - ' + str(e),
                                        'Was encountered an error when'
                                        ' processing your request. We '
@@ -244,7 +202,6 @@ class ValeuDetail(APIView):
                                            [serializer.data])
             return Response(data)
         else:
-            LogManager.log(self, logging.ERROR, str(e));
             meta_error = MetaError('Valeu Detail is invalid to put',
                                    'Valeu Detail is invalid to put',
                                    status.HTTP_400_BAD_REQUEST)
@@ -274,7 +231,6 @@ class ValeuDetail(APIView):
         try:
             valeu.delete()
         except Exception as e:
-            LogManager.log(self, logging.ERROR, str(e));
             meta_error = MetaError('Internal Server Error - ' + str(e),
                                    'Was encountered an error when'
                                    ' processing your request. We '
