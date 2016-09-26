@@ -25,8 +25,11 @@ class SlackApi:
             raise Exception('Error in request slack api (http://slack.com/api/chat.postMessage) ' + str(e))
 
         if res.status_code == http.client.OK:
+
             stream = BytesIO(res.content)
             data = JSONParser().parse(stream)
+            print(data)
+
             return data
         else:
             raise Exception('Could not be to send message')
