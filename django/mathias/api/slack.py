@@ -2,14 +2,15 @@
 import http.client
 
 import requests
+from django.conf import settings
 from django.utils.six import BytesIO
 from rest_framework.parsers import JSONParser
 
 
 class SlackApi:
 
-    host = 'slack.com/api/chat.postMessage'
-    token = 'xoxp-2151854096-3554168434-83813457751-3dc48fd695f528da9ab8a1de9b5fa82d'
+    host = settings.SLACK['host']
+    token = settings.SLACK['token']
 
     @staticmethod
     def send_message(self, channel, username, icon_url, attachments):
@@ -18,7 +19,7 @@ class SlackApi:
                '&icon_url=' + icon_url + '&attachments=' + attachments;
         try:
             res = requests.post(
-                'http://slack.com/api/chat.postMessage'+url,
+                SlackApi.host + 'chat.postMessage' + url
             )
 
         except Exception as e:
@@ -28,8 +29,7 @@ class SlackApi:
 
             stream = BytesIO(res.content)
             data = JSONParser().parse(stream)
-            print(data)
-
+          
             return data
         else:
             raise Exception('Could not be to send message')
@@ -37,10 +37,10 @@ class SlackApi:
     @staticmethod
     def get_users(self):
 
-        url = '?token=' + SlackApi.token;
+        url = '?token=' + SlackApi.token
         try:
             res = requests.get(
-                'https://slack.com/api/users.list' + url,
+                SlackApi.host + 'users.list' + url,
             )
 
         except Exception as e:

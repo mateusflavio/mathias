@@ -212,3 +212,10 @@ LOGGING = {
         }
     }
 }
+
+SLACK = {
+
+    'token': os.environ.get('SLACK_TOKEN', ''),
+    'host': os.environ.get('SLACK_HOST', ''),
+
+}
