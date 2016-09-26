@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import http.client
+from .base import *
 
 import requests
 from django.utils.six import BytesIO
@@ -9,7 +10,7 @@ from rest_framework.parsers import JSONParser
 class SlackApi:
 
     host = 'slack.com/api/chat.postMessage'
-    token = 'xoxp-2151854096-3554168434-83721985331-3eeb5d6670ad5a1b4fb640d4b3bd6c31'
+    token = 'xoxp-2151854096-3554168434-83813457751-3dc48fd695f528da9ab8a1de9b5fa82d'
 
     @staticmethod
     def send_message(self, channel, username, icon_url, attachments):
