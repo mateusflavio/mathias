@@ -2,6 +2,7 @@ from django.db import connection
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.utils import timezone
 
 class HealthcheckView(APIView):
     def get(self, request, format=None):
@@ -14,6 +15,8 @@ class HealthcheckView(APIView):
             "APPLICATION": True,
             "MYSQL": True
         }
+
+        print(timezone.now())
 
         try:
             cursor = connection.cursor()
