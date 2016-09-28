@@ -90,19 +90,18 @@ class ValeuList(APIView):
             calculate = serializer_request.save()
 
             try:
-                valeu = AdapterValeu(calculate).adapter()
+                result = AdapterValeu(calculate).adapter()
 
-                if '@' in valeu:
-                    meta_error = MetaError('User(s) '+ valeu +' in /valeu not found',
-                                           'User(s) '+ valeu +' in /valeu not found',
-                                           status.HTTP_404_NOT_FOUND)
+                if isinstance(result, list):
+                    for v in result:
+                        v.save()
+                        self.send_message(v)
+                else:
+
                     data = meta.determine_metadata_error(request, self,
-                                                         [meta_error])
+                                                         [result])
                     return Response(data,
-                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                for v in valeu:
-                    v.save()
-                    self.send_message(v)
+                                    status=result.error_code)
 
             except Exception as e:
                 meta_error = MetaError('Internal Server Error - ' + str(e),
