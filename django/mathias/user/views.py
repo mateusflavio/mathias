@@ -8,12 +8,11 @@ from mathias.api.slack import SlackApi
 from mathias.user.core.adapter_user import AdapterUser
 from mathias.utils.metadata import MetaError
 
-
 class UserList(APIView):
 
     def post(self, request, format=None):
         """
-        Save user
+        Import users by slack to database
         ---
         """
         meta = self.metadata_class()
@@ -24,11 +23,6 @@ class UserList(APIView):
             list_users = AdapterUser(users).adapter()
 
             for u in list_users:
-                # if u.id == 'U22C623DL':
-                #     teste = u.title
-                #
-                #     u.title = teste[0:-1]
-
                 u.save()
         except Exception as e:
             meta_error = MetaError('Internal Server Error - ' + str(e),

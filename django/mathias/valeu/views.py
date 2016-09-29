@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import logging
 from django.db import connection
 
 from django.http import Http404
@@ -18,8 +17,7 @@ from mathias.valeu.serializers import ValeuSerializer, ValeuSaveSerializer
 class ValeuList(APIView):
     def search_points_user(self, user_name_to):
 
-        query = mysql_count_valeu.query(
-            user_name_from=user_name_to)
+        query = mysql_count_valeu.query(user_name_from=user_name_to)
         raw_list = []
         with connection.cursor() as c:
             c.execute(query)
@@ -37,15 +35,10 @@ class ValeuList(APIView):
     def send_message(self, valeu):
 
         raw_list = self.search_points_user(valeu.user_name_to)
-
         pretext = '<@' + str(valeu.user_id_to) + '>' + ' now has ' + str(raw_list[0]['points']) + ' points!'
-
         message = 'from ' + '<@' + str(valeu.user_id_from) + '>:\n' + valeu.text
-
-        attachments = '[{ "color": "good", "pretext":"' + pretext + '", ' + '"text":"' + message + '"}]'
-
+        attachments = '[{ "fallback": "'+pretext+'", '+'"color": "good", "pretext":"' + pretext + '", ' + '"text":"' + message + '"}]'
         icon_url = 'http://luizalabs.com/static/img/ll.png'
-
         return SlackApi.send_message(self, valeu.channel_id, 'destaque', icon_url, attachments);
 
     def get(self, request, format=None):
@@ -121,7 +114,7 @@ class ValeuList(APIView):
             meta_error = MetaError(
                 'Bad Request - Body invalid for ValeuSaveSerializer ' +
                 str(serializer_request.errors),
-                'Your request is invalid for a new /valeu',
+                'Your request is invalid for a new /vlw',
                 status.HTTP_400_BAD_REQUEST)
             data = meta.determine_metadata_error(request, self,
                                                  [meta_error])

@@ -5,13 +5,12 @@ from mathias.valeu.models import Valeu, SaveValeu
 
 
 class ValeuSerializer(serializers.ModelSerializer):
-    createAt = serializers.CharField(max_length=20, source='create_at')
 
     class Meta:
         model = Valeu
         fields = ('id', 'team_id', 'team_domain', 'channel_id', 'channel_name',
                   'user_id_from', 'user_name_from', 'user_id_to', 'user_name_to',
-                  'command', 'text', 'createAt')
+                  'command', 'text', 'create_at')
 
 class ValeuSaveSerializer(serializers.Serializer):
     token = serializers.CharField()

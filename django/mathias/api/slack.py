@@ -29,7 +29,6 @@ class SlackApi:
 
             stream = BytesIO(res.content)
             data = JSONParser().parse(stream)
-            print(data)
 
             return data
         else:

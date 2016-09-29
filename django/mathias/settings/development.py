@@ -1,6 +1,6 @@
 from .base import *
 
-ENVIRONMENT = 'DEV'
+
 
 DATABASES = {
      'default': {
@@ -13,4 +13,5 @@ DATABASES = {
      }
  }
 
+ENVIRONMENT = 'DEV'
 MORE_INFO = 'http://developer.apiluiza.com.br/codigos-de-erro'

@@ -187,35 +187,8 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 # the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'handlers': {
-        'logstash': {
-          'class': 'logstash.TCPLogstashHandler',
-          'host': 'log.burzum.appsluiza.com.br',
-          'port': 5030,
-          'version': 1,
-          'message_type': 'logstash',
-          'fqdn': False
-      }
-    },
-    'loggers': {
-        '': {
-            'handlers': ['logstash'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'django': {
-            'level': 'ERROR',
-            'propagate': True,
-        }
-    }
-}
 
 SLACK = {
-
     'token': os.environ.get('SLACK_TOKEN', ''),
     'host': os.environ.get('SLACK_HOST', ''),
-
 }
