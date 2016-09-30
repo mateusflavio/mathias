@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from rest_framework import serializers
 
+from mathias.user.models import User
+from mathias.user.serializers import UserSerializer
 from mathias.valeu.models import Valeu, SaveValeu
 
 
@@ -29,4 +31,17 @@ class ValeuSaveSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         return instance
+
+
+class ValeuLeaderBoardSerializer(serializers.Serializer):
+    total = serializers.IntegerField()
+    user = serializers.SerializerMethodField()
+
+    def get_user(self, obj):
+
+        user = User.objects.get(name=obj['user_name_to'])
+
+        serializer_user = UserSerializer(user)
+
+        return serializer_user.data
 
