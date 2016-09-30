@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import connection
+from django.db.models import Count
 
 from django.http import Http404
 from rest_framework import status
@@ -11,7 +12,10 @@ from mathias.utils.metadata import Meta, MetaError
 from mathias.valeu.core.adapter_valeu import AdapterValeu
 from mathias.valeu.core import mysql_count_valeu
 from mathias.valeu.models import Valeu
-from mathias.valeu.serializers import ValeuSerializer, ValeuSaveSerializer
+from mathias.valeu.serializers import (
+    ValeuSerializer,
+    ValeuSaveSerializer,
+    ValeuLeaderBoardSerializer)
 
 
 class ValeuList(APIView):
@@ -230,3 +234,64 @@ class ValeuDetail(APIView):
                                    status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ValeuLeaderBoard(APIView):
+    def get(self, request, format=None):
+        """
+        List leader board
+        ---
+        response_serializer: ValeuLeaderBoardSerializer
+        parameters:
+            - name: month
+              description: month of valeu created
+              paramType: query
+              required: false
+              type: integer
+        """
+        meta = self.metadata_class()
+
+        try:
+
+            if request.GET.get('month'):
+
+                month = request.GET.get('month')
+
+                leader_board = Valeu.objects.filter(create_at__month=month).values('user_name_to').annotate(
+                    total=Count('user_name_to')).order_by(
+                    '-total')
+
+                if not leader_board:
+
+                    meta_error = MetaError('leader board not found',
+                                           'You attempted to get leaderboard by month ' + month + ', but did not find any',
+                                           status.HTTP_404_NOT_FOUND)
+                    data = meta.determine_metadata_error(request, self, [meta_error])
+                    return Response(data, status=status.HTTP_404_NOT_FOUND)
+
+            else:
+
+                leader_board = Valeu.objects.all().values('user_name_to').annotate(
+                    total=Count('user_name_to')).order_by(
+                    '-total')
+
+                if not leader_board:
+                    meta_error = MetaError('leader board not found',
+                                           'You attempted to get leaderboard but did not find any',
+                                           status.HTTP_404_NOT_FOUND)
+                    data = meta.determine_metadata_error(request, self, [meta_error])
+                    return Response(data, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = ValeuLeaderBoardSerializer(leader_board, many=True)
+            data = meta.determine_metadata(request, self, Meta(), serializer.data)
+            return Response(data)
+
+        except Exception as e:
+            meta_error = MetaError('Internal Server Error - ' + str(e),
+                                   'Was encountered an error when'
+                                   ' processing your request. We '
+                                   'apologize for the inconvenience',
+                                   status.HTTP_500_INTERNAL_SERVER_ERROR)
+            data = meta.determine_metadata_error(
+                request, self, [meta_error])
+            return Response(data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -2,7 +2,7 @@ import os
 from decouple import config
 
 DEBUG = config('DEBUG', default=False, cast=bool)
-VERSION = '1.0.1'
+VERSION = '1.1.0'
 
 ADMINS = (
 
