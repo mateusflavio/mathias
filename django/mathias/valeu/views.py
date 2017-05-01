@@ -86,13 +86,8 @@ class ValeuList(APIView):
         serializer_request = ValeuSaveSerializer(data=request.data)
 
         if request.data['channel_id'] != settings.SLACK['channel_id']:
-            meta_error = MetaError(
-                'Bad Request - Body invalid for /vlw, your channel not is barravaleu',
-                'Your request is invalid for a new /vlw, your channel not is barravaleu',
-                status.HTTP_400_BAD_REQUEST)
-            data = meta.determine_metadata_error(request, self,
-                                                 [meta_error])
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            return Response('Your request is invalid for a new /vlw, your channel not is barravaleu!',
+                            status=status.HTTP_200_OK)
 
         if serializer_request.is_valid():
 
