@@ -2,7 +2,7 @@ import os
 from decouple import config
 
 DEBUG = config('DEBUG', default=False, cast=bool)
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 
 ADMINS = (
 
@@ -188,7 +188,4 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 
-SLACK = {
-    'token': os.environ.get('SLACK_TOKEN', ''),
-    'host': os.environ.get('SLACK_HOST', ''),
-}
+

@@ -16,7 +16,7 @@ class SlackApi:
     def send_message(self, channel, username, icon_url, attachments):
 
         url = '?token=' + SlackApi.token + '&channel=' + channel + '&username=' + username + \
-               '&icon_url=' + icon_url + '&attachments=' + attachments;
+               '&icon_url=' + icon_url + '&attachments=' + attachments
         try:
             res = requests.post(
                 SlackApi.host + 'chat.postMessage' + url

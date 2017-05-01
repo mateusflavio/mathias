@@ -16,6 +16,7 @@ from mathias.valeu.serializers import (
     ValeuSerializer,
     ValeuSaveSerializer,
     ValeuLeaderBoardSerializer)
+from django.conf import settings
 
 
 class ValeuList(APIView):
@@ -40,10 +41,12 @@ class ValeuList(APIView):
 
         raw_list = self.search_points_user(valeu.user_name_to)
         pretext = '<@' + str(valeu.user_id_to) + '>' + ' now has ' + str(raw_list[0]['points']) + ' points!'
-        message = 'from ' + '<@' + str(valeu.user_id_from) + '>:\n' + valeu.text
-        attachments = '[{ "fallback": "'+pretext+'", '+'"color": "good", "pretext":"' + pretext + '", ' + '"text":"' + message + '"}]'
-        icon_url = 'http://luizalabs.com/static/img/ll.png'
-        return SlackApi.send_message(self, valeu.channel_id, 'destaque', icon_url, attachments);
+        message = 'from ' + '<@' + str(valeu.user_id_from) + '>:\n' + valeu.text + '\n' +\
+                  'View the <' + settings.SLACK['leaderboard_url'] + '|leaderboard>'
+        attachments = '[{ "fallback": "'+pretext+'", '+'"color": "good", "pretext":"' + pretext + '", ' + \
+                      '"text":"' + message + '"}]'
+        icon_url = settings.SLACK['icon_url']
+        return SlackApi.send_message(self, valeu.channel_id, settings.SLACK['app_name'], icon_url, attachments)
 
     def get(self, request, format=None):
         """
@@ -82,6 +85,15 @@ class ValeuList(APIView):
 
         serializer_request = ValeuSaveSerializer(data=request.data)
 
+        if request.data['channel_id'] != settings.SLACK['channel_id']:
+            meta_error = MetaError(
+                'Bad Request - Body invalid for /vlw, your channel not is barravaleu',
+                'Your request is invalid for a new /vlw, your channel not is barravaleu',
+                status.HTTP_400_BAD_REQUEST)
+            data = meta.determine_metadata_error(request, self,
+                                                 [meta_error])
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
         if serializer_request.is_valid():
 
             calculate = serializer_request.save()
@@ -112,7 +124,6 @@ class ValeuList(APIView):
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             return Response(status=status.HTTP_200_OK)
-
 
         else:
             meta_error = MetaError(
