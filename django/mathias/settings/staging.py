@@ -14,6 +14,15 @@ DATABASES = {
     }
 }
 
+SLACK = {
+    'token': os.environ.get('SLACK_TOKEN', ''),
+    'host': os.environ.get('SLACK_HOST', ''),
+    'channel_id': os.environ.get('SLACK_CHANNEL_ID'),
+    'leaderboard_url': os.environ.get('SLACK_LEADERBOARD_URL'),
+    'icon_url': os.environ.get('SLACK_ICON_URL'),
+    'app_name': os.environ.get('SLACK_APP_NAME'),
+}
+
 ENVIRONMENT = 'STAGE'
 
 MORE_INFO = 'http://developer.apiluiza.com.br/codigos-de-erro'
