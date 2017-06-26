@@ -180,6 +180,15 @@ PROJECT_APPS = [
     'mathias.user',
 ]
 
+SLACK = {
+    'token': os.environ.get('SLACK_TOKEN', ''),
+    'host': os.environ.get('SLACK_HOST', ''),
+    'channel_id': os.environ.get('SLACK_CHANNEL_ID'),
+    'leaderboard_url': os.environ.get('SLACK_LEADERBOARD_URL'),
+    'icon_url': os.environ.get('SLACK_ICON_URL'),
+    'app_name': os.environ.get('SLACK_APP_NAME'),
+}
+
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
 # A sample logging configuration. The only tangible logging

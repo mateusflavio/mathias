@@ -41,5 +41,6 @@ nosetests.xml
 *.log
 htmlcov/
 .idea/
+.vscode/
 
 django/static/
