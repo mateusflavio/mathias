@@ -18,6 +18,8 @@ from mathias.valeu.serializers import (
     ValeuLeaderBoardSerializer)
 from django.conf import settings
 
+import datetime
+
 
 class ValeuList(APIView):
     def search_points_user(self, user_name_to):
@@ -41,9 +43,9 @@ class ValeuList(APIView):
 
         raw_list = self.search_points_user(valeu.user_name_to)
         pretext = '<@' + str(valeu.user_id_to) + '>' + ' now has ' + str(raw_list[0]['points']) + ' points!'
-        message = 'from ' + '<@' + str(valeu.user_id_from) + '>:\n' + valeu.text + '\n' +\
+        message = 'from ' + '<@' + str(valeu.user_id_from) + '>:\n' + valeu.text + '\n' + \
                   'View the <' + settings.SLACK['leaderboard_url'] + '|leaderboard>'
-        attachments = '[{ "fallback": "'+pretext+'", '+'"color": "good", "pretext":"' + pretext + '", ' + \
+        attachments = '[{ "fallback": "' + pretext + '", ' + '"color": "good", "pretext":"' + pretext + '", ' + \
                       '"text":"' + message + '"}]'
         icon_url = settings.SLACK['icon_url']
         return SlackApi.send_message(self, valeu.channel_id, settings.SLACK['app_name'], icon_url, attachments)
@@ -263,12 +265,14 @@ class ValeuLeaderBoard(APIView):
 
                 month = request.GET.get('month')
 
-                leader_board = Valeu.objects.filter(create_at__month=month).values('user_name_to').annotate(
+                now = datetime.datetime.now()
+
+                leader_board = Valeu.objects.filter(create_at__month=month, create_at__year=now.year).values(
+                    'user_name_to').annotate(
                     total=Count('user_name_to')).order_by(
                     '-total')
 
                 if not leader_board:
-
                     meta_error = MetaError('leader board not found',
                                            'You attempted to get leaderboard by month ' + month + ', but did not find any',
                                            status.HTTP_404_NOT_FOUND)
